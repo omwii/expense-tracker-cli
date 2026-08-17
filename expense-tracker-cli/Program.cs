@@ -4,7 +4,8 @@ using expense_tracker_cli.Services;
 
 IExpenseService expenseService = new ExpenseService();
 
-var rootCommand = new RootCommand("Expense tracer cli");
+expenseService.LoadExpenses();
+
 var addCommand = new Command("add", "Expense add command");
 var deleteCommand = new Command("delete", "Expense delete command");
 var updateCommand = new Command("update", "Expense update command");
