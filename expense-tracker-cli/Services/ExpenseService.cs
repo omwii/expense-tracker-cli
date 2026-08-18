@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using expense_tracker_cli.Interfaces;
 using expense_tracker_cli.Models;
@@ -62,7 +61,11 @@ public class ExpenseService : IExpenseService
 
     public void ListExpenses()
     {
-
+        var s = string.Format($"{0, -3} {1, -15} {2, -8} {3, -10}", "Id", "Description", "Amount", "Date");
+        s = _expenses.Values.Aggregate(s,
+            (current, expense) => current + string.Format($"{0,-3} {1,-15} {2,-8} {3,-10}", expense.Id,
+                expense.Description, expense.Amount, expense.Date));
+        Console.WriteLine(s);
     }
 
     public void SummaryExpenses(int month = 0)
