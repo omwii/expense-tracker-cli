@@ -6,6 +6,7 @@ IExpenseService expenseService = new ExpenseService();
 
 expenseService.LoadExpenses();
 
+var rootCommand = new Command("expense-tracker-cli");
 var addCommand = new Command("add", "Expense add command");
 var deleteCommand = new Command("delete", "Expense delete command");
 var updateCommand = new Command("update", "Expense update command");
@@ -51,6 +52,11 @@ expenseMonthOption.Validators.Add(result =>
     }
 });
 
+rootCommand.Add(addCommand);
+rootCommand.Add(deleteCommand);
+rootCommand.Add(updateCommand);
+rootCommand.Add(listCommand);
+rootCommand.Add(summaryCommand);
 addCommand.Add(expenseDescriptionOption);
 addCommand.Add(expenseAmountOption);
 deleteCommand.Add(expenseIdOption);
@@ -80,3 +86,5 @@ summaryCommand.SetAction(result =>
 {
     expenseService.SummaryExpenses(result.GetValue(expenseMonthOption));
 });
+
+return rootCommand.Parse(args).Invoke();

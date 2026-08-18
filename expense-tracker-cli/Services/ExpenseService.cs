@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using expense_tracker_cli.Interfaces;
 using expense_tracker_cli.Models;
@@ -12,29 +13,27 @@ public class ExpenseService : IExpenseService
 
     public void LoadExpenses()
     {
-        if (File.Exists(FileName))
+        if (!File.Exists(FileName)) return;
+        var file = File.ReadAllText(FileName);
+        var json = JsonSerializer.Deserialize<List<Expense>>(file, _serializerOptions);
+        if (json != null)
         {
-            var file = File.ReadAllText(FileName);
-            var json = JsonSerializer.Deserialize<List<Expense>>(file, _serializerOptions);
-            if (json != null)
+            _expenses.Clear();
+            foreach (var expense in json)
             {
-                _expenses.Clear();
-                foreach (var expense in json)
-                {
-                    _expenses.Add(expense.Id, expense);
-                }
+                _expenses.Add(expense.Id, expense);
             }
-            else
-                throw new FileLoadException();
         }
         else
-            File.Create(FileName);
+            throw new FileLoadException();
     }
     
     public void AddExpense(string description, int amount)
     {
-        var id = _expenses.Values.Select(x => x.Id).Max() + 1;
-        var expense = new Expense(id, description, amount);
+        var id = 1;
+        if (_expenses.Count > 0)
+            id = _expenses.Values.Select(x => x.Id).Max() + 1;
+        var expense = new Expense(id, description, amount, DateTime.Now);
         _expenses.Add(id, expense);
         
         UpdateFile();
@@ -61,10 +60,25 @@ public class ExpenseService : IExpenseService
 
     public void ListExpenses()
     {
-        var s = string.Format($"{0, -3} {1, -15} {2, -8} {3, -10}", "Id", "Description", "Amount", "Date");
-        s = _expenses.Values.Aggregate(s,
-            (current, expense) => current + string.Format($"{0,-3} {1,-15} {2,-8} {3,-10}", expense.Id,
-                expense.Description, expense.Amount, expense.Date));
+        var descriptions = _expenses.Values.Select(x => x.Description).Append("Description");
+        var longestDescriptionLength = descriptions.Max(x => x.Length);
+        var amounts = _expenses.Values.Select(x => x.Amount.ToString(CultureInfo.InvariantCulture)).Append("Amount");
+        var longestAmountLength = amounts.Max(x => x.Length);
+
+        var s = $"{"Id",-3} " +
+                $"{"Description".PadRight(longestDescriptionLength)} " +
+                $"{"Amount".PadRight(longestAmountLength)} " +
+                $"{"Date",-9}\n";
+
+        foreach (var expense in _expenses.Values)
+        {
+            var line = $"{expense.Id,-3} " +
+                       $"{expense.Description.PadRight(longestDescriptionLength)} " +
+                       $"{expense.Amount.ToString(CultureInfo.InvariantCulture).PadRight(longestAmountLength)} " +
+                       $"{expense.Date,-9:yy-MM-dd}\n";
+            s += line;
+        }
+        
         Console.WriteLine(s);
     }
 
