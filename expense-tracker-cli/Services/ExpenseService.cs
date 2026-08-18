@@ -20,9 +20,7 @@ public class ExpenseService : IExpenseService
         {
             _expenses.Clear();
             foreach (var expense in json)
-            {
                 _expenses.Add(expense.Id, expense);
-            }
         }
         else
             throw new FileLoadException();
@@ -60,25 +58,29 @@ public class ExpenseService : IExpenseService
 
     public void ListExpenses()
     {
-        var descriptions = _expenses.Values.Select(x => x.Description).Append("Description");
-        var longestDescriptionLength = descriptions.Max(x => x.Length);
-        var amounts = _expenses.Values.Select(x => x.Amount.ToString(CultureInfo.InvariantCulture)).Append("Amount");
-        var longestAmountLength = amounts.Max(x => x.Length);
+        // Find longest column elements for dynamic padding
+        var idColumnElements = _expenses.Values.Select(x => x.Id.ToString(CultureInfo.InvariantCulture)).Append("Id");
+        var longestIdLength = idColumnElements.Max(x => x.Length);
+        var descriptionColumnElements = _expenses.Values.Select(x => x.Description).Append("Description");
+        var longestDescriptionLength = descriptionColumnElements.Max(x => x.Length);
+        var amountColumnElements = _expenses.Values.Select(x => x.Amount.ToString(CultureInfo.InvariantCulture))
+            .Append("Amount");
+        var longestAmountLength = amountColumnElements.Max(x => x.Length);
 
-        var s = $"{"Id",-3} " +
+        // Add table header with dynamic padding
+        var s = $"{"Id".PadRight(longestIdLength)} " +
                 $"{"Description".PadRight(longestDescriptionLength)} " +
                 $"{"Amount".PadRight(longestAmountLength)} " +
                 $"{"Date",-9}\n";
 
-        foreach (var expense in _expenses.Values)
-        {
-            var line = $"{expense.Id,-3} " +
-                       $"{expense.Description.PadRight(longestDescriptionLength)} " +
-                       $"{expense.Amount.ToString(CultureInfo.InvariantCulture).PadRight(longestAmountLength)} " +
-                       $"{expense.Date,-9:yy-MM-dd}\n";
-            s += line;
-        }
-        
+        // Add table elements with dynamic padding
+        s = _expenses.Values.Select(expense =>
+                $"{expense.Id.ToString(CultureInfo.InvariantCulture).PadRight(longestIdLength)} " +
+                $"{expense.Description.PadRight(longestDescriptionLength)} " +
+                $"{expense.Amount.ToString(CultureInfo.InvariantCulture).PadRight(longestAmountLength)} " +
+                $"{expense.Date,-9:yy-MM-dd}\n")
+            .Aggregate(s, (current, line) => current + line);
+
         Console.WriteLine(s);
     }
 
