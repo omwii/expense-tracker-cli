@@ -18,6 +18,8 @@ public class DeleteCommand(IExpenseService expenseService) : ICommand
             var id = result.GetRequiredValue(idArgument);
             
             expenseService.Delete(id);
+            
+            Console.WriteLine($"Deleted expense with id {id}");
         });
         
         return command;

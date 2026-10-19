@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using ExpenseTrackerCLI.Commands;
 using ExpenseTrackerCLI.Infrastructure;
+using ExpenseTrackerCLI.Models;
 using ExpenseTrackerCLI.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 var services = new ServiceCollection();
 
 // Services
+services.AddSingleton<TrackerConfig>();
 services.AddSingleton<IExpenseService, ExpenseService>();
 
 // Infrastructure

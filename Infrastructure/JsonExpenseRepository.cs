@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using ExpenseTrackerCLI.Models;
 
@@ -12,21 +13,23 @@ public class JsonExpenseRepository : IExpenseRepository
         EnsureDirectoryExists();
 
         var expensesPaths = Directory.EnumerateFiles("Expenses");
-        return
-        [
-            .. expensesPaths.Select(File.ReadAllText)
-                .Select(file => JsonSerializer.Deserialize<Expense>(file))
-                .OfType<Expense>()
-        ];
+        return [.. expensesPaths
+            .Select(File.ReadAllText)
+            .Select(file => JsonSerializer.Deserialize<Expense>(file))];
     }
 
-    public Expense? GetById(Guid id)
+    public bool TryGet(Guid id, out Expense expense)
     {
         EnsureDirectoryExists();
 
         var path = Path.Combine("Expenses", $"{id.ToString()}.json");
-
-        return File.Exists(path) ? JsonSerializer.Deserialize<Expense>(File.ReadAllText(path)) : null;
+        
+        expense = File.Exists(path)
+            ? JsonSerializer.Deserialize<Expense>(File.ReadAllText(path),
+                SerializerOptions)
+            : default;
+        
+        return File.Exists(path);
     }
 
     public void Write(Expense expense)
@@ -44,9 +47,10 @@ public class JsonExpenseRepository : IExpenseRepository
     {
         EnsureDirectoryExists();
 
-        var path = Path.Combine("Expenses", id.ToString());
+        var path = Path.Combine("Expenses", $"{id.ToString()}.json");
         
-        File.Delete(path);
+        if (File.Exists(path))
+            File.Delete(path);
     }
 
     private void EnsureDirectoryExists()

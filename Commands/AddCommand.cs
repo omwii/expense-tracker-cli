@@ -1,9 +1,10 @@
 using System.CommandLine;
+using ExpenseTrackerCLI.Models;
 using ExpenseTrackerCLI.Services;
 
 namespace ExpenseTrackerCLI.Commands;
 
-public class AddCommand(IExpenseService expenseService) : ICommand
+public class AddCommand(IExpenseService expenseService, TrackerConfig trackerConfig) : ICommand
 {
     public Command Build()
     {
@@ -44,6 +45,18 @@ public class AddCommand(IExpenseService expenseService) : ICommand
             var creationAt = DateTime.Now;
             
             expenseService.Add(amount, description, category, creationAt);
+            
+            Console.WriteLine($"Successfully added expense:" +
+                              $"\n- Amount: {amount}" +
+                              $"\n- Category: {category}" +
+                              $"\n- Description: {description}" +
+                              $"\n- Date: {creationAt.ToLongDateString()}" +
+                              $"\n- Time: {creationAt.ToShortTimeString()}");
+            
+            if (expenseService.Expenses
+                    .Where(pair => pair.Value.CreatedAt.Month == DateTime.Now.Month)
+                    .Sum(pair => pair.Value.Amount) > trackerConfig.Budget)
+                Console.WriteLine("Warning! Monthly budget is exceeded");
         });
         
         return command;

@@ -7,9 +7,9 @@ namespace ExpenseTrackerCLI.Infrastructure;
 
 public class CsvExpenseExporter : IExpenseExporter
 {
-    public void Export(IEnumerable<Expense> expenses, FileInfo path)
+    public void Export(IEnumerable<Expense> expenses, FileInfo outputFileInfo)
     {
-        using var writer = new StreamWriter(path.FullName);
+        using var writer = new StreamWriter(outputFileInfo.FullName);
         using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csv.WriteRecords((IEnumerable)expenses);
     }

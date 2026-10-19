@@ -4,8 +4,8 @@ namespace ExpenseTrackerCLI.Services;
 
 public interface IExpenseService
 {
-    public Dictionary<Guid, Expense> Expenses { get; }
-    public void Add(decimal amount, string? description, string? category, DateTime createdAt);
-    public void Update(Guid id, decimal? amount, string? description, string? category);
-    public void Delete(Guid id);
+    Dictionary<Guid, Expense> Expenses { get; }
+    void Add(decimal amount, string? description, string? category, DateTime createdAt);
+    void Update(Guid id, decimal? amount, string? description, string? category);
+    void Delete(Guid id);
 }

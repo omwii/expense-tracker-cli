@@ -10,16 +10,17 @@ public class ExportCommand(IExpenseService expenseService, IExpenseExporter expe
     {
         var command = new Command("export", "Export all expenses into CSV file");
         
-        var pathArgument = new Argument<FileInfo>("path");
+        var outputArgument = new Argument<FileInfo>("output");
         
-        command.Add(pathArgument);
+        command.Add(outputArgument);
         
         command.SetAction(result =>
         {
-            var expenses = expenseService.Expenses;
-            var path = result.GetRequiredValue(pathArgument);
+            var path = result.GetRequiredValue(outputArgument);
             
-            expenseExporter.Export(expenses.Values.ToList(), path);
+            expenseExporter.Export(expenseService.Expenses.Values, path);
+            
+            Console.WriteLine($"Expenses exported to {path.FullName}");
         });
         
         return command;
